@@ -77,6 +77,41 @@ async function main() {
   console.log(
     `Deleted item: follower=${commonFollowerHandle}_1, followee=${commonFolloweeHandle}`
   );
+
+  // ----------------------------------------------------
+  // 6. Paged query: Get first and second pages of followees for a given follower
+  // ----------------------------------------------------
+  console.log("Querying paged followees for follower:", commonFollowerHandle);
+  const pageSize = 10;
+  let followeesPage = await dao.getPageOfFollowees(commonFollowerHandle, pageSize);
+  console.log("First page of followees:", followeesPage.items);
+  if (followeesPage.lastKey && followeesPage.lastKey.followee_handle) {
+    const secondFolloweesPage = await dao.getPageOfFollowees(
+      commonFollowerHandle,
+      pageSize,
+      followeesPage.lastKey.followee_handle
+    );
+    console.log("Second page of followees:", secondFolloweesPage.items);
+  } else {
+    console.log("No more pages for followees.");
+  }
+
+  // ----------------------------------------------------
+  // 7. Paged query: Get first and second pages of followers for a given followee (using follows_index)
+  // ----------------------------------------------------
+  console.log("Querying paged followers for followee:", commonFolloweeHandle);
+  let followersPage = await dao.getPageOfFollowers(commonFolloweeHandle, pageSize);
+  console.log("First page of followers:", followersPage.items);
+  if (followersPage.lastKey && followersPage.lastKey.follower_handle) {
+    const secondFollowersPage = await dao.getPageOfFollowers(
+      commonFolloweeHandle,
+      pageSize,
+      followersPage.lastKey.follower_handle
+    );
+    console.log("Second page of followers:", secondFollowersPage.items);
+  } else {
+    console.log("No more pages for followers.");
+  }
 }
 
 main().catch((err) => {
